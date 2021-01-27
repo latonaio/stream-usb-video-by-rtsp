@@ -31,8 +31,14 @@ DEFAULT_HEIGHT = int(os.environ.get("HEIGHT", 480))
 DEFAULT_FPS = int(os.environ.get("FPS", 10))
 DEFAULT_PORT = int(os.environ.get("PORT", 8554))
 DEFAULT_URI = os.environ.get("URI", "/usb")
+DEFAULT_START_WITH_CONFIG = "False"
 
 SERVICE_NAME = "stream-usb-video-by-rtsp"
+SUFFIX = os.environ.get('SUFFIX', 0)
+SERVICE_NAME = SERVICE_NAME + '-' + str(SUFFIX) if SUFFIX != 0 else SERVICE_NAME
+
+# TODO あんまかっこよくないのでkeyを統一するかなんかしたい
+CONNECTION_KEY_LIST = ["streaming","video0","video1"]
 
 def get_pipeline(width, height, fps):
     return f"""
@@ -43,7 +49,7 @@ def get_pipeline(width, height, fps):
 
 class DeviceConfigController:
     def __init__(self, config_path: str):
-        self.__device_path = '/dev/video0'
+        self.__device_path = '/devices/video0'
         self.__config_path = config_path
         self.dc = DeviceConfig(self.config_path, self.device_path)
 
@@ -245,7 +251,7 @@ class DeviceData:
 
     def __init__(self, serial, device_path, number, width, height, fps, is_docker, num):
         self.serial = serial
-        port = DEFAULT_PORT + number
+        port = DEFAULT_PORT + int(SUFFIX)
         self.addr = SERVICE_NAME + "-" + str(num).zfill(3) + "-srv:" + str(port) \
             if is_docker else "localhost:" + str(port)
         self.addr += DEFAULT_URI
@@ -277,6 +283,11 @@ class DeviceDataList:
         metadata_list = []
         # start device list
         for serial, path in device_list.items():
+            # example of path: /device/video0
+            # start server only if video's number matching pod's number such as stream-usb-video-by-rtsp-1
+            # if aion use only one video, evaluating the condition would be skipped
+            if int(SUFFIX) > 0 and path[-1:] != int(SUFFIX) - 1:
+                continue
             lprint(f"Get device data (serial: {serial}, path: {path})")
             # set device path
             if self.device_data_list.get(serial):
@@ -332,13 +343,13 @@ def main(opt: Options):
     # for debug
     if debug:
         conn.set_kanban(SERVICE_NAME, num)
-        device.start_rtsp_server({"test": "/dev/video0"}, scale, opt.is_docker(), 1, False, device_config)
+        device.start_rtsp_server({"test": "/devices/video0"}, scale, opt.is_docker(), 1, False, device_config)
         while True:
             sleep(5)
     try:
         for kanban in conn.get_kanban_itr(SERVICE_NAME, num):
             key = kanban.get_connection_key()
-            if key == "streaming":
+            if key in CONNECTION_KEY_LIST:
                 device_list = kanban.get_metadata().get("device_list")
                 if not device_list:
                     continue
