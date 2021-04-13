@@ -3,7 +3,7 @@
 # Copyright (c) 2019-2020 Latona. All rights reserved.
 
 from aion.logger import lprint
-from aion.microservice import main_decorator, Options
+from aion.microservice import main_decorator, Options, WITH_KANBAN
 
 import asyncio
 import json
@@ -328,7 +328,7 @@ class DeviceDataList:
             data.stop()
 
 
-@main_decorator(SERVICE_NAME)
+@main_decorator(SERVICE_NAME, WITH_KANBAN)
 def main(opt: Options):
     conn = opt.get_conn()
     num = opt.get_number()
@@ -340,14 +340,9 @@ def main(opt: Options):
     start_with_config = DEFAULT_START_WITH_CONFIG if os.environ.get('START_WITH_CONFIG') is None else os.environ.get('START_WITH_CONFIG')
     config_path = '/var/lib/aion/Data/stream-usb-video-by-rtsp_' + str(num) + '/config.json'
     device_config = DeviceConfigController(config_path)
-    # for debug
-    if debug:
-        conn.set_kanban(SERVICE_NAME, num)
-        device.start_rtsp_server({"test": "/devices/video0"}, scale, opt.is_docker(), 1, False, device_config)
-        while True:
-            sleep(5)
+
     try:
-        for kanban in conn.get_kanban_itr(SERVICE_NAME, num):
+        for kanban in conn.get_kanban_itr():
             key = kanban.get_connection_key()
             if key in CONNECTION_KEY_LIST:
                 device_list = kanban.get_metadata().get("device_list")
