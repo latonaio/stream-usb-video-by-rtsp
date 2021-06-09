@@ -1,6 +1,17 @@
 # 概要
 接続されたUSBカメラから画像データ取得し、RTSP方式で他マイクロサービスに画像データを配信するサービスです。
 
+# 動作環境
+このマイクロサービスはAIONのプラットフォーム上での動作を前提としています。 使用する際は、事前にAIONの動作環境を用意してください。AIONに関しては[こちら](https://github.com/latonaio/aion-core)をご覧ください。
+
+- OS: Linux
+
+- CPU: Intel64/AMD64/ARM64
+
+- Kubernetes
+
+- AION
+
 # カメラ設定
 下記のpathに配置してある設定ファイルを読み込んで、auto_focusなどの設定を行います。
 
