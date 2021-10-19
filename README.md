@@ -1,15 +1,14 @@
 # 概要
 stream-usb-video-by-rtspは、主にエッジコンピューティング環境において、接続されたUSBカメラから画像データを取得し、RTSP方式で他マイクロサービスに画像データを配信するマイクロサービスです。  
 
-# 動作環境  
+# 動作環境   
 stream-usb-video-by-rtspは、aion-coreのプラットフォーム上での動作を前提としています。  
 使用する際は、事前に下記の通りAIONの動作環境を用意してください。  
-
-ARM CPU搭載のデバイス(NVIDIA Jetson シリーズ等)  
-OS: Linux Ubuntu OS  
-CPU: ARM/AMD/Intel   
+ 
+OS: Linux OS  
+CPU: ARM/AMD/Intel     
 Kubernetes  
-AIONのリソース  
+AIONのリソース    
 
 # カメラ設定
 下記のpathに配置してある設定ファイルを読み込んで、auto_focusなどの設定を行います。
